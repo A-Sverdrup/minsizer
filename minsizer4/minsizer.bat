@@ -1,0 +1,1 @@
+py .\minsizer4.py -m * -e %*
