@@ -82,3 +82,51 @@ minsizer4 input1 [input2] ... [inputN]: If input is an image, convert the input
 minsizer4 dir: Converts all images in <dir> and all its subfolders.
 minsizer4 input: Convert a single image. Sets /MODE to '*' and enables /E
 ```
+
+# changelog
+
+## minsizer1
+webpify and avifyier (all  versions): shitty little scripts to automatically convert images in current folder into webp only and avif only respectively
+
+minsizer1: merge webpify and avifyier
+
+minsizer1.2: fix args, quiet mode
+
+minsizer1.3.0: initial cavif support
+
+minsizer1.3.5: initial documentation, refactoring
+
+minsizer1.4: improve ui (add statistics), initial gif2webp support
+
+minsizer1.5: add dry-run
+
+## minsizer2
+
+minsizer2: lost media. unknown.
+
+minsizer2.1: initial tiff2png support, improve statistics
+
+minsizer2.2: documentation, refactoring (modular system)
+
+## minsizer3
+
+minsizer3.0: switch from incepts to globator, improve ui (add Images Found), improve modular system, documentation, accept commandline argument as input, python-embedded-package compatibility
+
+minsizer3.2: initial bmp2png support
+
+minsizer3.4: switch from os.system to subprocess.Popen as backend, make 2-step conversion ( X -> png -> avif/webp) modular, make sample image-based binary testing modular
+
+minsizer3.5: minor tweaks, python-embedded-package compatibility
+
+## minsizer4
+
+minsizer4: total UI overhaul. Interactive mode. Proper command-line arguments. Documentation and help-string.
+
+minsizer4.5: Improve UI (more responsive, but still not real-time). Initial Ctrl+C SIGTERM handling.
+
+
+
+
+
+
+
