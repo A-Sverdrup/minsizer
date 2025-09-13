@@ -120,13 +120,23 @@ minsizer3.5: minor tweaks, python-embedded-package compatibility
 
 ## minsizer4
 
-minsizer4: total UI overhaul. Interactive mode. Proper command-line arguments. Documentation and help-string.
+minsizer4: Total UI overhaul. Interactive mode. Proper command-line arguments. Documentation and help-string.
 
 minsizer4.5: Improve UI (more responsive, but still not real-time). Initial Ctrl+C SIGTERM handling.
 
+## minsizer5
 
+Snooping as usual, i see? These are FUTURE versions.
 
+minsizer5: Add option to preserve alpha-channel. Modify UI
 
+minsizer5.5: Redo UI (still not real-time).
+
+minsizer6: Total UI overhaul (real-time progress monitoring).
+
+minsizer6.5: Initial ffmpeg support.
+
+minsizer7: The final version..?
 
 
 
