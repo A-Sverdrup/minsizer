@@ -1,5 +1,8 @@
 # minsizer
-Automatically compress JPEG/JFIF, PNG*, BMP, GIF and TIFF** images into WebP or AVIF using cwebp, gif2webp, avifenc, cavif, tiff2png and  bmp2png.
+Automatically compress JPEG/JFIF, PNG*, BMP**, GIF*** and TIFF*** images into WebP or AVIF using cwebp, gif2webp, avifenc, cavif, tiff2png, bmp2png and magick.
+
+(cwebp, gif2webp, avifenc, cavif, tiff2png, bmp2png and magick) ARE provided with release packages.
+
 ```
 minsizer4
 minsizer4 /?
@@ -133,6 +136,8 @@ Snooping as usual, i see? These are FUTURE versions.
 minsizer5: Redo UI (still not real-time).
 
 minsizer5.2: Initial magick support
+
+minsizer5.3: Initial cjxl support
 
 minsizer6: Total UI overhaul (real-time progress monitoring).
 
