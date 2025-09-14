@@ -131,13 +131,15 @@ minsizer4.3: Add option to preserve alpha-channel. Modify UI
 
 ## minsizer5
 
-Snooping as usual, i see? These are FUTURE versions.
-
 minsizer5: Redo UI (still not real-time).
 
 minsizer5.2: Initial magick support
 
 minsizer5.3: Initial cjxl support
+
+##Future versions
+
+TODO: Fix skip list being broken since 3.0
 
 minsizer6: Total UI overhaul (real-time progress monitoring).
 
