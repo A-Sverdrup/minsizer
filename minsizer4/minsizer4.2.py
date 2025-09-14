@@ -164,9 +164,6 @@ def convertPNG(path,nl=True):
         BIO=[['cavif',f'--lossless -i "{path}" -o "{path}.nlc.avif"',f'{path}.nlc.avif'],
                   ['avifenc',f'-q 100 --qalpha 0 -d 8 "{path}" -o "{path}.nl.avif"',f'{path}.nl.avif'],
                   ['cwebp',f'-noalpha -lossless "{path}" -o "{path}.nl.webp"',f'{path}.nl.webp']]
-        BIO=[['cavif',f'--lossless -i "{path}" -o "{path}.nlc.avif"',f'{path}.nlc.avif'],
-                  ['avifenc',f'-q 100 --qalpha 0 -d 8 "{path}" -o "{path}.nl.avif"',f'{path}.nl.avif'],
-                  ['cwebp',f'-noalpha -lossless "{path}" -o "{path}.nl.webp"',f'{path}.nl.webp']]
     for b,i,o in BIO:
         if not (B:=binaries[b]):X();continue
         t+=t0;t0=-time();pf(b)

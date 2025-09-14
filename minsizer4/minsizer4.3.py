@@ -1,4 +1,4 @@
-if __name__!='__main__':raise ImportError("minsizer5 is not a module!")
+if __name__!='__main__':raise ImportError("minsizer4 is not a module!")
 try:str(exit)
 except NameError:from _sitebuiltins import Quitter;exit=Quitter('exit','')
 from glob import glob
@@ -9,11 +9,11 @@ from sys import argv,stderr
 from time import time,sleep
 from pickle import dump,load
 __doc__='''\
-minsizer5
-minsizer5 /?
-minsizer5 [-h/--help]
-minsizer5 [/MODE <mode>] [/A] [/E] [/Q] [input1] [input2...inputN]
-minsizer5 [-m/--mode <mode>] [-a] [-e] [-q] [input1] [input2...inputN]
+minsizer4
+minsizer4 /?
+minsizer4 [-h/--help]
+minsizer4 [/MODE <mode>] [/A] [/E] [/Q] [input1] [input2...inputN]
+minsizer4 [-m/--mode <mode>] [-a] [-e] [-q] [input1] [input2...inputN]
 --------------------------------------------------------------------------------
 Automatically compress JPEG/JFIF, PNG, BMP, GIF and TIFF images into WebP or
 AVIF using cwebp, gif2webp, avifenc, cavif, tiff2png and bmp2png with the
@@ -63,10 +63,10 @@ bmp2png and tiff2png manpages to understand parameters.
 Dependencies (cwebp.exe, gif2webp.exe, avifenc.exe, cavif.exe, bmpp2png.exe,
 tiff2png.exe) are expected to be found in ./lib subfolder or on PATH
 
-minsizer5: Convert images in current folder and all its subfolders in
+minsizer4: Convert images in current folder and all its subfolders in
            interactive mode
            
-minsizer5 [-m/--mode] OR minsizer5 /MODE: Automatic mode: specify filetypes
+minsizer4 [-m/--mode] OR minsizer4 /MODE: Automatic mode: specify filetypes
                                           J/P/B/G/T/*:
                                           J: JPEG/JFIF only
                                           P: PNG only
@@ -82,23 +82,23 @@ minsizer5 [-m/--mode] OR minsizer5 /MODE: Automatic mode: specify filetypes
                                           '*G' will convert every supported
                                           image type
                                           
-minsizer5 [-a] OR minsizer5 /A: Preserve alpha-channel for PNG and TIFF.
+minsizer4 [-a] OR minsizer4 /A: Preserve alpha-channel for PNG and TIFF.
 
-minsizer5 [-e] OR minsizer5 /E: Ignore errors and proceed, do not ask user input
+minsizer4 [-e] OR minsizer4 /E: Ignore errors and proceed, do not ask user input
                                 to continue.
                                 
-minsizer5 [-q] OR minsizer5 /Q: Quit after finishing conversion, do not ask user
+minsizer4 [-q] OR minsizer4 /Q: Quit after finishing conversion, do not ask user
                                 input to exit.
 
-minsizer5 [-h/--help] OR minsizer5 /?: Show this help message and exit.
+minsizer4 [-h/--help] OR minsizer4 /?: Show this help message and exit.
 
-minsizer5 input1 [input2] ... [inputN]: If input is an image, convert the input
+minsizer4 input1 [input2] ... [inputN]: If input is an image, convert the input
                                         image.
                                         If input is a folder, convert all images
                                         in input folder and all its subfolders. 
 
-minsizer5 dir: Converts all images in <dir> and all its subfolders. 
-minsizer5 input: Convert a single image. Sets /MODE to '*' and enables /E
+minsizer4 dir: Converts all images in <dir> and all its subfolders. 
+minsizer4 input: Convert a single image. Sets /MODE to '*' and enables /E
 '''
 import subprocess
 def shell(command):
@@ -116,10 +116,7 @@ def test(name,arg,error=None):
     if shell((cwd:=f'.{sep}lib{sep}{name}.exe')+arg):
         if shell(name+arg):
             if error:print(name,'not found!\n',error,file=stderr)
-            else:
-                print(name,'not found!',file=stderr);
-                if not ex:input('Press enter to exit.')
-                exit(code=1);
+            else:print(name,'not found!',file=stderr);exit(code=1);
         else:print('Using global',name);return name
     else:print('Using local',cwd);return cwd
 testPNG=b'\x89PNG\r\n\x1a\nX\rIHDRX\x01X\x01\x08\x02X\x90wS\xdeX\x01sRGBZ\xae\xce\x1c\xe9X\x04gAMAZZ\xb1\x8f\x0b\xfca\x05X\tpHYsZZ\x1d\x87ZZ\x1d\x87\x01\x8f\xe5\xf1eX\x0cIDAT\x18Wc\xf8\xff\xff?Z\x05\xfe\x02\xfe\xa75\x81\x84XZIEND\xaeB`\x82'.replace(b'X',b'ZZZ').replace(b'Z',b'\x00')
@@ -144,60 +141,48 @@ def size(n,n2=None):
     while n>1024:n/=1024;p+=1
     return str(round(n,3))+' '+['b','kb','MB','GB','TB'][p]
 def date(n,n2=None):return('Elapsed:%s ETA:%s'%(date(n),date(n2)))if n2!=None else('%02d:%02d:%02d.%s'%(n//3600,(n//60)%60,n%60,str(n%1)[2:6].ljust(4,'0')))
+gbuff=''
 tact=0
-#def tick(*a):global buff,tact;print(buff+' '+'/|\-'[tact%4]);tact=(tact+1)%4
-c80=lambda s='':print('\n'+s.center(80,'-'))
-buff=[]
-def pt(b,t):
-    global buff;buff+=[b,t];print(*buff,end='\r')
-def ps(s):
-    global buff;del buff[-1];buff.append(s);print(*buff,end='\r')
-def ms(s,ms,v):
-    global buff;buff=[buff[0],f'({size(s,ms)})',v];print(*buff,end='\r')
-def keep(path):
-    skip2.add(path);
-    global buff;buff=buff[:2]+['keep'];print(*buff,end='\r')
-def fail(path):
-    anomalies.add(path);skip2.add(path);
-    global buff;buff=buff[:2]+['fail (?)'];print(*buff,end='\r')
-def nls(n,l,s):
-    global buff;buff=[f'{n}/{l}',f'({size(s)})']
-def pf2(*a,end='\r'):
-    global buff;buff.append(' '.join(a));print(*buff,end=end)
-
+def pf(*a):global gbuff;print(gbuff+' '.join(a)+' ',end='\r');gbuff+=' '.join(a)+' '
+#def tick(*a):global gbuff,tact;print(gbuff+' '+'/|\-'[tact%4]);tact=(tact+1)%4
+def pe(*a):global gbuff;print(gbuff+' '.join(a)+' ',end='\n');gbuff=''
+def flush():global gbuff;gbuff=''
+def fail(path):anomalies.add(path);skip2.add(path);pf('fail(?)','(%s)'%size(getsizenan(path)),path)
+def keep(path):skip2.add(path);pf('keep','(%s)'%size(getsizenan(path)),path)
+c80=lambda s='':print('\n'+s.center(80,'-'));X=lambda:pf('X');V=lambda:pf('V')
 def convert_2_(path,binary,fstring,ext):
-    t=-time();pt(binary,'(Spinner )');I=getsizenan(path)
-    if shell(fstring):t+=time();ps('(Fail    )');keep(path);return t,I,I,None,path
+    t=-time();pf(binary);I=getsizenan(path)
+    if shell(fstring):t+=time();X();keep(path);return t,I,I
     else:
-        t+=time();png=path[:path.rindex('.')]+'.png'
-        ps(f'({size(getsizenan(png))})')
-        if (c:=convertPNG(png,c2=None))[3]:
-            if getsizenan(png)<I:ms(I,c[2],f'minsized {binary}');rmerr(path);return t+c[0],I,c[2],None,png
-            else:keep(path);rmerr(png);return t,I,I,None,path
+        t+=time();V()
+        png=path[:path.rindex('.')]+'.png'
+        if(c:=convertPNG(png,nl=None))[3]:
+            if getsizenan(png)<I:pf(f'minsized ({size(I,c[2])})',png);rmerr(path);return t+c[0],I,c[2],None,png
+            else:keep(path);rmerr(pngpath);return t,I,I,None,path
         else:
             if c[2]<I:
-                ms(I,c[2],'minsized')
+                pf(f'minsized ({size(I,c[2])})')
                 try:rename(c[4],(m:=c[4].replace('.png.nl.c.avif',f'.{ext}.avif').replace('.png.nl.avif',f'.{ext}.avif').replace('.png.nl.webp',f'.{ext}.webp')));ny=m
-                except:ny=c[4]
+                except:ny=pf(c[4])
                 rmerr(path)
                 return t+c[0],I,c[2],None,ny
             else:keep(path);rmerr(c[4]);return t,I,I,None,path
-def convertPNG(path,c2=True):
-    fl={path:getsizenan(path)};bn={path:'keep'};t=t0=0;I=getsizenan(path)
-    ct2=''if c2 else'.nl'
-    for b,i,o in [['cavif',f'--lossless -i "{path}" -o "{path}{ct2}.c.avif"',f'{path}{ct2}.c.avif'],
-                  ['avifenc',f'-q 100 --qalpha {"100"if alpha else "0"} -d 8 "{path}" -o "{path}{ct2}.avif"',f'{path}{ct2}.avif'],
-                  ['cwebp',f'{""if alpha else "-noalpha "}-lossless "{path}" -o "{path}{ct2}.webp"',f'{path}{ct2}.webp']]:#[int(alpha):]:
-        if not(B:=binaries[b]):continue
-        t+=t0;t0=-time();pt(b,'(Spinner )')
-        if shell(B+' '+i):t0+=time();ps('(Fail    )')
-        else:t0+=time();fl[o]=getsizenan(o);bn[o]=b;ps(f'({size(fl[o])})')
+def convertPNG(path,nl=True):
+    fl={path:getsizenan(path)};t=t0=0;I=getsizenan(path)
+    nlc=''if nl else'.nl'
+    for b,i,o in [['cavif',f'--lossless -i "{path}" -o "{path}{nlc}.c.avif"',f'{path}{nlc}.c.avif'],
+                  ['avifenc',f'-q 100 --qalpha {"100"if alpha else "0"} -d 8 "{path}" -o "{path}{nlc}.avif"',f'{path}{nlc}.avif'],
+                  ['cwebp',f'{""if alpha else "-noalpha "}-lossless "{path}" -o "{path}{nlc}.webp"',f'{path}{nlc}.webp']]:#[int(alpha):]:
+        if not(B:=binaries[b]):X();continue
+        t+=t0;t0=-time();pf(b)
+        if shell(B+' '+i):t0+=time();X()
+        else:t0+=time();V();fl[o]=getsizenan(o)
     if len(fl)==1:fail(path)
     (M:=fl.pop(m:=min(fl,key=lambda i:fl[i])))
     for j in fl:rmerr(j)
-    if(m==path)and c2:keep(path)
-    elif c2:
-        ms(I,M,f'minsized {bn[m]}')
+    if(m==path)and nl:keep(path)
+    elif nl:
+        pf(f'minsized ({size(fl[path],M)})')
         if endswith(m,'.c.avif'):
             try:rename(m,(m2:=m.replace('.c.avif','.avif')));m=m2
             except:None
@@ -208,17 +193,17 @@ def convert___(path,bio):
 - command prompt template: f'{bin} <codec arguments> "{path}" -o "{path}.<extension>"'
 - output filename template: f'{path}.<extension>'
 '''
-    fl={path:getsizenan(path)};bn={path:'keep'};t=t0=0;I=getsizenan(path)
+    fl={path:getsizenan(path)};t=t0=0;I=getsizenan(path)
     for b,i,o in bio:
         if not(B:=binaries[b]):continue
-        t+=t0;t0=-time();pt(b,'(Spinner )')
-        if shell(B+' '+i):t0+=time();ps('(Fail    )')
-        else:t0+=time();fl[o]=getsizenan(o);bn[o]=b;ps(f'({size(fl[o])})')
+        t+=t0;t0=-time();pf(b)
+        if shell(B+' '+i):t0+=time();X()
+        else:t0+=time();V();fl[o]=getsizenan(o)
     if len(fl)==1:fail(path)
     (M:=fl.pop(m:=min(fl,key=lambda i:fl[i])))
     for j in fl:rmerr(j)
     if(m==path):keep(path)
-    else:ms(I,M,f'minsized {bn[m]}')
+    else:pf(f'minsized ({size(fl[path],M)})')
     return t,I,M,m==path,m
 
 ############# Codec parameters (See codec manpages to understand) ##############
@@ -286,12 +271,12 @@ binaries={
     'avifenc':test('avifenc',' --version '),
     'gif2webp':test('gif2webp',' -version ',error='[.gif] files cannot be converted!'),
     'tiff2png':test('tiff2png','',error='[.tif .tiff] files cannot be converted!'),
-    'bmp2png':imgtest('bmp2png',' minsizer-test.bmp',testBMP,'minsizer-test.bmp','minsizer-test.png',error='[.bmp] files cannot be converted!'),
+    'bmp2png':imgtest('bmp2png',' minsizer-test.bmp',testBMP,'minsizer-test.bmp','minsizer-test.png'),
     'cavif':imgtest('cavif',' -i minsizer-test.png -o minsizer-test.avif ',testPNG,'minsizer-test.png','minsizer-test.avif')
     }
 skip2=set();anomalies=set()
 def convert(files):
-    global formats,auto,alpha,ex,mode
+    global formats,auto,mode
     c80()
     try:
         with open('skip.pickle','rb')as f:skip=load(f)
@@ -307,10 +292,8 @@ def convert(files):
         for i in formats:
             if(l:=len(f:=fl[i])):print(f'[{" ".join(i)}]: {l} files ({size(sum(getsizenan(j,0)for j in f))})','to convert'if formats[i]else', nothing to do.')
             else:print('[%s]: No files found'%(' '.join(i)))
-        print(f'Automatic mode: {mode} Keep alpha: {"NY"[int(alpha)]} Ignore errors: {"NY"[int(auto)]} Quit after done: {"NY"[int(ex)]}')
-        try:
-            for i in range(3):print(f'Starting in {3-i} seconds. If you want to cancel, spam Ctrl-C NOW!',end='\r');sleep(1)
-        except KeyboardInterrupt:c80('Interrupt received - exiting');exit(code=0)
+        print('Automatic mode: %s Ignore errors: %s Quit after done: %s'%(mode,'NY'[int(auto)],'NY'[int(ex)]))
+        for i in range(3):print(f'Starting in {3-i} seconds. If you want to cancel, spam Ctrl-C NOW!',end='\r');sleep(1)
         print('Starting NOW!')
     else:
         buffer={}
@@ -323,35 +306,29 @@ def convert(files):
             print('Nothing to do!')
             if not ex:input('Press enter to exit.')
             exit(code=0)
-        try:
-            for i in(a if(a:=input('Select mode(s) with J/P/B/G/T/* (default=*):'))else'*'):
-                if i in mappings:formats[mappings[i]]=converters[mappings[i]]
-                elif i=='*':formats=converters;formats[('.gif',)]=None
-            if not alpha:alpha=(input('Keep alpha-channel (default=N)? [Y/N]')in['y','Y'])
-            if not auto:auto=(input('Pause on errors (default=Y)? [Y/N]')in['n','N'])
-            if not ex:ex=(input('Quit after done (default=N)? [Y/N]')in['y','Y'])
-            print(f'Mode: {mode} Keep alpha: {"NY"[int(alpha)]} Ignore errors: {"NY"[int(auto)]} Quit after done: {"NY"[int(ex)]}')
-        except KeyboardInterrupt:c80('Interrupt received - exiting');exit(code=0)
+        for i in(a if(a:=input('Select mode(s) with J/P/B/G/T/* (default=*):'))else'*'):
+            if i in mappings:formats[mappings[i]]=converters[mappings[i]]
+            elif i=='*':formats=converters;formats[('.gif',)]=None
         c80(' To do: ')
         for i in formats:
             if(l:=len(f:=fl[i])):print(buffer[i],'to convert'if formats[i]else', nothing to do.')
             else:print(buffer[i])
         del buffer
         c80()
-        try:pause()
-        except KeyboardInterrupt:c80('Interrupt received - exiting');exit(code=0)
+        if not auto:pause();auto=(input('Pause on errors (default=Y)? [Y/N]')in['n','N'])
     S=''
     for i in formats:
         try:
             if(l:=len(f:=fl[i]))and formats[i]:
                 c80('[%s]: Converting %s files'%(' '.join(i),l));n=1;I=MS=t0=T=0
                 for j in f:
-                    try:nls(n,l,getsizenan(j));t,Is,s,_N,nf=formats[i](j);T+=t;pf2(f'{date(t,T*l/n-T)}',nf,end='\n');I+=Is;MS+=s;n+=1
+                    try:pf(f'{n}/{l} ({size(getsizenan(j))})');t,Is,s,_N,nf=formats[i](j);T+=t;pe(f'{date(t,T*l/n-T)}',nf);I+=Is;MS+=s;n+=1
                     except KeyboardInterrupt:
-                        l-=1;c80('Interrupt received - paused')
+                        l-=1
+                        c80();print('\nInterrupt received - paused');flush()
                         if (choice:=input('Continue (skip file)[1], skip (skip format)[2] or exit[3]? [1/2/3]'))=='1':c80();continue
                         elif choice=='2':c80();break
-                        elif choice=='3':print(m:=f'\n[{" ".join(i)}]: minsized {l} files ({size(I,MS)}), time elapsed: {date(T)}');S+=m;raise RuntimeError
+                        elif choice=='3':raise RuntimeError
                 print(m:=f'\n[{" ".join(i)}]: minsized {l} files ({size(I,MS)}), time elapsed: {date(T)}');S+=m
         except RuntimeError:print('Exiting...');c80();break
     c80(' Statistics: ');print(S);c80(' Cleanup: ');
@@ -380,9 +357,7 @@ ex=extrargt('/Q','-q')
 alpha=extrargt('/A','-a')
 if len(argv)==2:
     if isdir(argv[1]):convert(globator([argv[1]]))
-    elif isfile(argv[1]):
-        if not mode:mode='*'
-        auto=True;convert([argv[1]])
+    elif isfile(argv[1]):mode='*';auto=True;convert([argv[1]])
     else:print('Unknown error!',file=stderr);exit(code=1)
 elif len(argv)>=2:
     muldirs=[];args=[]

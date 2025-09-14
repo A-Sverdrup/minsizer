@@ -16,8 +16,11 @@ minsizer5 [/MODE <mode>] [/A] [/E] [/Q] [input1] [input2...inputN]
 minsizer5 [-m/--mode <mode>] [-a] [-e] [-q] [input1] [input2...inputN]
 --------------------------------------------------------------------------------
 Automatically compress JPEG/JFIF, PNG, BMP, GIF and TIFF images into WebP or
-AVIF using cwebp, gif2webp, avifenc, cavif, tiff2png and bmp2png with the
-highest quality possible (lossless or lossy >99%).
+AVIF using cwebp, gif2webp, avifenc, cavif, tiff2png, bmp2png and ImageMagick
+with the highest quality possible (lossless or lossy >99%) and highest posible
+compression effort.
+
+Can also try and recompress WebP using ImageMagick.
 
 Important notices:
 
@@ -39,9 +42,9 @@ Compatibility issue: Most software do not support animated WebP.
 
 TIFF:
 Data loss warning: Alpha-channel is not preserved by default and will be LOST!
-Inefficiency:          When preserving alpha-channel, cavif is disabled as it
-                       does not support transparency. avifenc is used instead,
-                       but it has worse compression ratio.
+Inefficiency:      When preserving alpha-channel, cavif is disabled as it does
+                   not support transparency. avifenc is used instead, but it has
+                   worse compression ratio.
 Data loss warning: If a PNG file with the same name is present in the same
                    folder, it will be LOST. This is an oversight caused by
                    tiff2png and cannot be easily fixed.
@@ -49,8 +52,8 @@ Data loss warning: If a PNG file with the same name is present in the same
 Only the smallest resulting file is kept. If the original (unconverted) file was
 kept as smallest, it will not be converted next run (skipped).
 
-Almost in-place conversion. Requires at most 4x as much disk space as the
-largest image by file size in the dataset.
+Almost in-place conversion. Requires at most 6x (BMP/TIFF) / 5x (PNG) / 4x (JPG)
+as much disk space as the largest image by file size in the dataset.
 
 Conversion time depends mostly on your hardware and can easily reach multiple
 hours and even days when converting large datasets (thousands of pictures).
@@ -60,10 +63,10 @@ Does not accept arguments to pass-through to codecs! Edit source code to see
 defaults and tweak codec parameters. See cwebp, gif2webp, avifenc, cavif, 
 bmp2png and tiff2png manpages to understand parameters.
 
-Dependencies (cwebp.exe, gif2webp.exe, avifenc.exe, cavif.exe, bmpp2png.exe,
-tiff2png.exe) are expected to be found in ./lib subfolder or on PATH
+Dependencies (cwebp.exe, gif2webp.exe, avifenc.exe, cavif.exe, bmp2png.exe,
+tiff2png.exe, magick.exe) are expected to be found in ./lib subfolder or on PATH
 
-minsizer5: Convert images in current folder and all its subfolders in
+minsizer5: Convert images in current folder and all its subfolders in 
            interactive mode
            
 minsizer5 [-m/--mode] OR minsizer5 /MODE: Automatic mode: specify filetypes
@@ -73,13 +76,17 @@ minsizer5 [-m/--mode] OR minsizer5 /MODE: Automatic mode: specify filetypes
                                           B: BMP only
                                           G: GIF only
                                           T: TIFF only
-                                          *: Everything  except GIF (equivalent
-                                          to 'JPBT')
+                                          W: WebP only
+                                          A: AVIF only (does nothing)
+                                          X: JXL only  (does nothing)
+                                          *: Everything except GIF and WEBP
+                                          (equivalent to 'JPBT')
+                                          
                                           Combinations of above symbols may also
                                           be used, e.g. 'JP' will convert both
                                           JPG and PNG images, 'BPT' will
                                           convert BMP, PNG and TIFF images and
-                                          '*G' will convert every supported
+                                          '*GW' will convert every supported
                                           image type
                                           
 minsizer5 [-a] OR minsizer5 /A: Preserve alpha-channel for PNG and TIFF.
@@ -111,6 +118,12 @@ def rmerr(path,err='Fail removing %s!'):
     except:
         print(err%path,file=stderr)
         if not auto:pause()
+def rnerr(path,path2,err='Fail renaming %s to %s!'):
+    try:rename(path,path2);return True
+    except:
+        print(err%(path,path2),file=stderr)
+        if not auto:pause()
+        return False
 def test(name,arg,error=None):
     print('Testing for %s...'%name)
     if shell((cwd:=f'.{sep}lib{sep}{name}.exe')+arg):
@@ -176,9 +189,7 @@ def convert_2_(path,binary,fstring,ext):
             else:keep(path);rmerr(png);return t,I,I,None,path
         else:
             if c[2]<I:
-                ms(I,c[2],'minsized')
-                try:rename(c[4],(m:=c[4].replace('.png.nl.c.avif',f'.{ext}.avif').replace('.png.nl.avif',f'.{ext}.avif').replace('.png.nl.webp',f'.{ext}.webp')));ny=m
-                except:ny=c[4]
+                ny=m if rnerr(c[4],(m:=c[4].replace('.png.nl.',f'.{ext}.')))else c[4]
                 rmerr(path)
                 return t+c[0],I,c[2],None,ny
             else:keep(path);rmerr(c[4]);return t,I,I,None,path
@@ -187,22 +198,26 @@ def convertPNG(path,c2=True):
     ct2=''if c2 else'.nl'
     for b,i,o in [['cavif',f'--lossless -i "{path}" -o "{path}{ct2}.c.avif"',f'{path}{ct2}.c.avif'],
                   ['avifenc',f'-q 100 --qalpha {"100"if alpha else "0"} -d 8 "{path}" -o "{path}{ct2}.avif"',f'{path}{ct2}.avif'],
-                  ['cwebp',f'{""if alpha else "-noalpha "}-lossless "{path}" -o "{path}{ct2}.webp"',f'{path}{ct2}.webp']]:#[int(alpha):]:
+                  ['cwebp',f'{""if alpha else "-noalpha "}-lossless "{path}" -o "{path}{ct2}.webp"',f'{path}{ct2}.webp'],
+                  ['magick',f'"{path}" -quality 100 {""if alpha else "-alpha off "}-define avif:lossless=true "{path}{ct2}.m.avif"',f'{path}{ct2}.m.avif'],
+                  ['magick',f'"{path}" -quality 100 {""if alpha else "-alpha off "}-define webp:lossless=true -define webp:method=6 "{path}{ct2}.m.webp"',f'{path}{ct2}.m.webp']][int(alpha):]:
         if not(B:=binaries[b]):continue
         t+=t0;t0=-time();pt(b,'(Spinner )')
-        if shell(B+' '+i):t0+=time();ps('(Fail    )')
+        if shell(B+' '+i):t0+=time();rmerr(o);ps('(Fail    )')
         else:t0+=time();fl[o]=getsizenan(o);bn[o]=b;ps(f'({size(fl[o])})')
     if len(fl)==1:fail(path)
     (M:=fl.pop(m:=min(fl,key=lambda i:fl[i])))
     for j in fl:rmerr(j)
     if(m==path)and c2:keep(path)
-    elif c2:
+    else:
         ms(I,M,f'minsized {bn[m]}')
-        if endswith(m,'.c.avif'):
-            try:rename(m,(m2:=m.replace('.c.avif','.avif')));m=m2
-            except:None
+        rnm={'.c.avif':'.avif','.m.avif':'.avif','.m.webp':'.webp'}
+        if endswith(m,[*rnm]):
+            m2=m
+            for i in rnm:m2=m2.replace(i,rnm[i])
+            if rnerr(m,m2):m=m2
     return t,I,M,m==path,m
-def convert___(path,bio):
+def convert___(path,bio,rnm):
     '''bio (binary-input-output) argument must be a list of tuples/lists, where each internal tuple/list must contain:
 - name of codec binary
 - command prompt template: f'{bin} <codec arguments> "{path}" -o "{path}.<extension>"'
@@ -212,13 +227,18 @@ def convert___(path,bio):
     for b,i,o in bio:
         if not(B:=binaries[b]):continue
         t+=t0;t0=-time();pt(b,'(Spinner )')
-        if shell(B+' '+i):t0+=time();ps('(Fail    )')
+        if shell(B+' '+i):t0+=time();rmerr(o);ps('(Fail    )')
         else:t0+=time();fl[o]=getsizenan(o);bn[o]=b;ps(f'({size(fl[o])})')
     if len(fl)==1:fail(path)
     (M:=fl.pop(m:=min(fl,key=lambda i:fl[i])))
     for j in fl:rmerr(j)
     if(m==path):keep(path)
-    else:ms(I,M,f'minsized {bn[m]}')
+    else:
+        ms(I,M,f'minsized {bn[m]}')
+        if endswith(m,[*rnm]):
+            m2=m
+            for i in rnm:m2=m2.replace(i,rnm[i])
+            if rnerr(m,m2):m=m2
     return t,I,M,m==path,m
 
 ############# Codec parameters (See codec manpages to understand) ##############
@@ -238,7 +258,11 @@ def convert___(path,bio):
 #    - arguments template: f'<codec arguments> "{path}" -o "{path}.<extension>"'
 #    - output filename template: f'{path}.<extension>'
 #    e.g. [['somecodecname'.f'{bin} --quiet -quality 100 "{path}" -o "{path}.image"',f'{path}.image']]
-#
+# 3: dict for rename bindings:
+#    {initial extension: new extension}
+#    If your different codecs create files with same name extension, this is a problem
+#    Solution? Add unique prefix to extension and remove it later!
+#    e.g. avifenc: .avif (keep), cavif: .c.avif -> avif, magick: .m.avif -> .avif
 # convertPNG
 # Cannot be configured in a simple way and should not be reconfigured,
 # as it is required for convert_2_-based functions to work.
@@ -249,9 +273,21 @@ def convertBMP(path):
     return convert_2_(path,'bmp2png',f'{binaries["bmp2png"]} "{path}" ','bmp')
 def convertJPG(path):
     return convert___(path,[['avifenc',f'--qalpha 0 -d 8 "{path}" -o "{path}.avif"',f'{path}.avif'],
-                            ['cwebp',f'-q 100 -noalpha "{path}" -o "{path}.webp"',f'{path}.webp']])
+                            ['cwebp',f'-q 100 -noalpha "{path}" -o "{path}.webp"',f'{path}.webp'],
+                            ['magick',f'"{path}" -quality 100 -define avif:lossless=true "{path}.m.avif"',f'{path}.m.avif'],
+                            ['magick',f'"{path}" -quality 100 -define webp:lossless=true -define webp:method=6 "{path}.m.webp"',f'{path}.m.webp']],
+                      {'.c.avif':'.avif','.m.avif':'.avif','.m.webp':'.webp'})
 def convertGIF(path):
-    return convert___(path,[['gif2webp',f'-min_size "{path}" -o "{path}.webp"',f'{path}.webp']])
+    return convert___(path,[['gif2webp',f'-min_size "{path}" -o "{path}.webp"',f'{path}.webp'],
+                            ['magick',f'"{path}" -quality 100 -define avif:lossless=true "{path}.avif"',f'{path}.avif'],
+                            ['magick',f'"{path}" -quality 100 -define webp:lossless=true -define webp:method=6 "{path}.m.webp"',f'{path}.m.webp']],
+                      {'.m.webp':'.webp'})
+def convertWEBP(path):
+    return convert___(path,[['magick',f'"{path}" -quality 100 -define webp:lossless=true -define webp:method=6 "{path}.m.webp"',f'{path}.m.webp']],
+                      {'.m.webp':'.webp'})
+##def convertTIF(path):
+##    return convert___(path,[['magick',f'"{path}" -quality 100 -define avif:lossless=true "{path}.m.avif"',f'{path}.m.avif'],
+##                            ['magick',f'"{path}" -quality 100 -define webp:lossless=true -define webp:method=6 "{path}.m.webp"',f'{path}.m.webp']])
 formats={('.jpg','.jpeg','.jfif'):None,('.png',):None,('.bmp',):None,('.gif',):None,('.tif','.tiff'):None,('.webp',):None,('.avif',):None,}
 ################################################################################
 # Map arguments to formats and formats to conversion function (convert) or None (ignore)
@@ -263,14 +299,16 @@ mappings={'J':('.jpg','.jpeg','.jfif'),
          'T':('.tif','.tiff'),
          'W':('.webp',),
          'A':('.avif',),
+         'X':('.jxl',),
          }
 converters={('.jpg','.jpeg','.jfif'):convertJPG,
          ('.png',):convertPNG,
          ('.bmp',):convertBMP,
          ('.gif',):convertGIF,
          ('.tif','.tiff'):convertTIF,
-         ('.webp',):None,
+         ('.webp',):convertWEBP,
          ('.avif',):None,
+         ('.jxl',):None,
          }
 ############################### Binaries lookup ################################
 # Codec binaries are expected to be in .\lib\ subfolder (local) or
@@ -284,6 +322,7 @@ converters={('.jpg','.jpeg','.jfif'):convertJPG,
 binaries={
     'cwebp':test('cwebp',' -version '),
     'avifenc':test('avifenc',' --version '),
+    'magick':test('magick',' --version '),
     'gif2webp':test('gif2webp',' -version ',error='[.gif] files cannot be converted!'),
     'tiff2png':test('tiff2png','',error='[.tif .tiff] files cannot be converted!'),
     'bmp2png':imgtest('bmp2png',' minsizer-test.bmp',testBMP,'minsizer-test.bmp','minsizer-test.png',error='[.bmp] files cannot be converted!'),
@@ -303,7 +342,7 @@ def convert(files):
     if mode:
         for i in mode:
             if i in mappings:formats[mappings[i]]=converters[mappings[i]]
-            elif i=='*':formats=converters;formats[('.gif',)]=None
+            elif i=='*':formats=converters;formats[('.gif',)]=None;formats[('.webp',)]=None
         for i in formats:
             if(l:=len(f:=fl[i])):print(f'[{" ".join(i)}]: {l} files ({size(sum(getsizenan(j,0)for j in f))})','to convert'if formats[i]else', nothing to do.')
             else:print('[%s]: No files found'%(' '.join(i)))
@@ -346,7 +385,7 @@ def convert(files):
             if(l:=len(f:=fl[i]))and formats[i]:
                 c80('[%s]: Converting %s files'%(' '.join(i),l));n=1;I=MS=t0=T=0
                 for j in f:
-                    try:nls(n,l,getsizenan(j));t,Is,s,_N,nf=formats[i](j);T+=t;pf2(f'{date(t,T*l/n-T)}',nf,end='\n');I+=Is;MS+=s;n+=1
+                    try:nls(n,l,getsizenan(j));t,Is,s,_N,nf=formats[i](j);T+=t;pf2(f'{date(t,T*l/n-T)}',end='\n');print(f'{n}/{l} {nf}');I+=Is;MS+=s;n+=1
                     except KeyboardInterrupt:
                         l-=1;c80('Interrupt received - paused')
                         if (choice:=input('Continue (skip file)[1], skip (skip format)[2] or exit[3]? [1/2/3]'))=='1':c80();continue
@@ -363,7 +402,7 @@ def convert(files):
     else:print('No files to skip on next run')
     if anomalies:print('%s files failed to convert:'%len(anomalies),*anomalies,'\nThese files may be corrupted.\nPlease check them manually',sep='\n')
     else:print('No failures detected')
-    if(l:=len(f:=['\n'.join([i]+[i+k for k in['.avif','.c.avif','.webp']if exists(i+k)])for i in incepts([getcwd()+sep],['*.jpg','*.jpeg','*.jfif','*.png','*.bmp','*.gif'])if any([exists(i+j)for j in['.avif','.c.avif','.webp']])])):print('%s amonalies detected:'%len(f),*f,'Please check these files manually',sep='\n\n')
+    if(l:=len(f:=['\n'.join([i]+[i+k for k in['.avif','.c.avif','.webp']if exists(i+k)])for i in incepts([getcwd()+sep],['*.jpg','*.jpeg','*.jfif','*.png','*.bmp','*.gif'])if any([exists(i+j)for j in['.avif','.c.avif','.m.avif','.m.webp','.webp']])])):print('%s amonalies detected:'%len(f),*f,'Please check these files manually',sep='\n\n')
     else:print('No anomalies detected')
     print('\x07\nAll done! ')
     if not ex:input('Press enter to exit.')
@@ -375,13 +414,14 @@ def extrargt(name,name2=None):
 mode=None
 for i in ['/MODE','-m','--mode']:
     if i in argv:mode=argv.pop(argv.index(i)+1);del argv[argv.index(i)]
+    print(mode)
 auto=extrargt('/E','-e')
 ex=extrargt('/Q','-q')
 alpha=extrargt('/A','-a')
 if len(argv)==2:
     if isdir(argv[1]):convert(globator([argv[1]]))
     elif isfile(argv[1]):
-        if not mode:mode='*'
+        if not mode:mode='JPBTGW'
         auto=True;convert([argv[1]])
     else:print('Unknown error!',file=stderr);exit(code=1)
 elif len(argv)>=2:
