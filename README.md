@@ -47,7 +47,7 @@ Data loss warning: If a PNG file with the same name is present in the same
 Only the smallest resulting file is kept. If the original (unconverted) file was
 kept as smallest, it will not be converted next run (skipped).
 
-Almost in-place conversion. Requires at most 6x (BMP/TIFF) / 5x (PNG) / 4x (JPG)
+Almost in-place conversion. Requires at most 6x (BMP/TIFF) / 5x (PNG) / 4x (JPG) / 3x (GIF)
 as much disk space as the largest image by file size in the dataset.
 
 Conversion time depends mostly on your hardware and can easily reach multiple
@@ -73,7 +73,6 @@ minsizer5 [-m/--mode] OR minsizer5 /MODE: Automatic mode: specify filetypes
                                           T: TIFF only
                                           W: WebP only
                                           A: AVIF only (does nothing)
-                                          X: JXL only  (does nothing)
                                           *: Everything except GIF and WEBP
                                           (equivalent to 'JPBT')
                                           
@@ -133,6 +132,8 @@ minsizer2.2: documentation, refactoring (modular system)
 
 minsizer3.0: switch from incepts to globator, improve ui (add Images Found), improve modular system, documentation, accept commandline argument as input, python-embedded-package compatibility
 
+minsizer3.1: unknown whether it even existed
+
 minsizer3.2: initial bmp2png support
 
 minsizer3.4: switch from os.system to subprocess.Popen as backend, make 2-step conversion ( X -> png -> avif/webp) modular, make sample image-based binary testing modular
@@ -152,8 +153,6 @@ minsizer4.3: Add option to preserve alpha-channel. Modify UI
 minsizer5: Redo UI (still not real-time).
 
 minsizer5.2: Initial magick support
-
-minsizer5.3: Initial cjxl support
 
 ## Future versions
 
