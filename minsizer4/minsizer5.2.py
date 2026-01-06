@@ -337,7 +337,7 @@ def convert(files):
         if skip:print('Skipping files:',*skip,sep='\n')
         else:print('No files to skip.')
     except:skip=set();print('Skip list not found. No files to skip.')
-    fl=sort(files)
+    fl=sort(list(set(files)-skip))
     c80(' Images found: ')
     if mode:
         for i in mode:
