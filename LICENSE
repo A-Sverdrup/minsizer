@@ -1,0 +1,11 @@
+Copyright (c) 2024, Antoniy Elias Sverdrup
+minsizer: BSD 3-Clause License (https://directory.fsf.org/wiki/License:BSD-3-Clause)
+
+
+-----------------------------------------------------------------------------
+Included software licenses
+
+libwebp: https://www.webmproject.org/license/software/
+libavif: https://github.com/AOMediaCodec/libavif?tab=License-1-ov-file
+libpng: https://libpng.org/pub/png/src/libpng-LICENSE.txt
+magick: https://imagemagick.org/script/license.php#gsc.tab=0
