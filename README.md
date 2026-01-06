@@ -33,6 +33,7 @@ Data loss warning: If a PNG file with the same name is present in the same
                    folder, it will be LOST. This is an oversight caused by
                    bmp2png and cannot be easily fixed.
 GIF:
+Data loss warning:   gif2webp is not entirely lossless.
 Compatibility issue: Most software do not support animated WebP.
 
 TIFF:
