@@ -157,8 +157,6 @@ minsizer5.2: Initial magick support
 
 ## Future versions
 
-TODO: Fix skip list being broken since 3.0
-
 minsizer6: Total UI overhaul (real-time progress monitoring).
 
 minsizer7: The final version..?
