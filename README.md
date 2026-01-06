@@ -1,5 +1,5 @@
 # minsizer
-Automatically compress JPEG/JFIF, PNG*, BMP**, GIF*** and TIFF*** images into WebP or AVIF using cwebp, gif2webp, avifenc, cavif, tiff2png, bmp2png and magick.
+Automatically compress JPEG/JFIF, PNG*, BMP**, GIF*** and TIFF*** images into WebP or AVIF using cwebp and gif2webp (https://chromium.googlesource.com/webm/libwebp), avifenc (https://github.com/AOMediaCodec/libavif), cavif (https://github.com/link-u/cavif), tiff2png and bmp2png (https://libpng.org/) and magick (https://imagemagick.org/).
 
 (cwebp, gif2webp, avifenc, cavif, tiff2png, bmp2png and magick) ARE provided with release packages.
 
