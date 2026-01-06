@@ -38,6 +38,7 @@ Data loss warning: If a PNG file with the same name is present in the same
                    folder, it will be LOST. This is an oversight caused by
                    bmp2png and cannot be easily fixed.
 GIF:
+Data loss warning:   gif2webp is not entirely lossless.
 Compatibility issue: Most software do not support animated WebP.
 
 TIFF:
@@ -78,7 +79,6 @@ minsizer5 [-m/--mode] OR minsizer5 /MODE: Automatic mode: specify filetypes
                                           T: TIFF only
                                           W: WebP only
                                           A: AVIF only (does nothing)
-                                          X: JXL only  (does nothing)
                                           *: Everything except GIF and WEBP
                                           (equivalent to 'JPBT')
                                           
@@ -279,8 +279,8 @@ def convertJPG(path):
                       {'.c.avif':'.avif','.m.avif':'.avif','.m.webp':'.webp'})
 def convertGIF(path):
     return convert___(path,[['gif2webp',f'-min_size "{path}" -o "{path}.webp"',f'{path}.webp'],
-                            ['magick',f'"{path}" -quality 100 -define avif:lossless=true "{path}.avif"',f'{path}.avif'],
-                            ['magick',f'"{path}" -quality 100 -define webp:lossless=true -define webp:method=6 "{path}.m.webp"',f'{path}.m.webp']],
+                            ['magick',f'"{path}" -coalesce -quality 100 -layers Optimize "{path}.m.gif"',f'{path}.m.gif'],
+                            ['magick',f'"{path}" -coalesce -quality 100 -define webp:lossless=true -define webp:method=6 "{path}.m.webp"',f'{path}.m.webp'],],
                       {'.m.webp':'.webp'})
 def convertWEBP(path):
     return convert___(path,[['magick',f'"{path}" -quality 100 -define webp:lossless=true -define webp:method=6 "{path}.m.webp"',f'{path}.m.webp']],
@@ -299,7 +299,6 @@ mappings={'J':('.jpg','.jpeg','.jfif'),
          'T':('.tif','.tiff'),
          'W':('.webp',),
          'A':('.avif',),
-         'X':('.jxl',),
          }
 converters={('.jpg','.jpeg','.jfif'):convertJPG,
          ('.png',):convertPNG,
@@ -308,7 +307,6 @@ converters={('.jpg','.jpeg','.jfif'):convertJPG,
          ('.tif','.tiff'):convertTIF,
          ('.webp',):convertWEBP,
          ('.avif',):None,
-         ('.jxl',):None,
          }
 ############################### Binaries lookup ################################
 # Codec binaries are expected to be in .\lib\ subfolder (local) or
